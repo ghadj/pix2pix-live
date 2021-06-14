@@ -134,9 +134,11 @@ tmp/
 # Images
 *.png
 *.jpg
-!sample-output.jpg
+!sample-output.*
 
 # Tensorflow Checkpoints
 *.index
 *.data*
 checkpoint
+**/logs/fit/*
+!**/logs/fit/README.md
