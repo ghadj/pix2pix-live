@@ -127,3 +127,16 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Misc
+tmp/
+
+# Images
+*.png
+*.jpg
+!sample-output.jpg
+
+# Tensorflow Checkpoints
+*.index
+*.data*
+checkpoint
