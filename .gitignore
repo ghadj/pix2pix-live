@@ -135,6 +135,7 @@ tmp/
 *.png
 *.jpg
 !sample-output.*
+annotations
 
 # Tensorflow Checkpoints
 *.index
