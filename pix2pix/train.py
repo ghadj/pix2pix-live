@@ -1,18 +1,11 @@
-import image as im
-import gan
-
 import os
 import time
 import datetime
 import tensorflow as tf
 
-EPOCHS = 300
-BUFFER_SIZE = 400
-BATCH_SIZE = 1
-DATASET_PATH = '../dataset/'
-LOG_DIR = "logs/"
-CHECKPOINT_DIR = './training_checkpoints'
-CHECKPOINT_IMG_DIR = CHECKPOINT_DIR + '/img/'
+import gan
+import image as im
+import params as pm
 
 
 @tf.function
@@ -57,8 +50,8 @@ def fit(train_ds, epochs, test_ds):
 
         for example_input, example_target in test_ds.take(1):
             gan.generate_images(generator, example_input, example_target,
-                                CHECKPOINT_IMG_DIR + '{0:03d}'.format(epoch) + '.png')
-        print("Epoch: ", epoch)
+                                pm.CHECKPOINT_IMG_DIR + '{0:03d}'.format(epoch) + '.png')
+        print('Epoch: ', epoch)
 
         # Train
         for n, (input_image, target) in train_ds.enumerate():
@@ -78,19 +71,18 @@ def fit(train_ds, epochs, test_ds):
 
 
 summary_writer = tf.summary.create_file_writer(
-    LOG_DIR + "fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))
+    pm.LOG_DIR + datetime.datetime.now().strftime('%Y%m%d-%H%M%S'))
 
 # Input pipeline
-train_dataset = tf.data.Dataset.list_files(DATASET_PATH+'train/*.jpg')
+train_dataset = tf.data.Dataset.list_files(pm.DATASET_PATH+'train/*.jpg')
 train_dataset = train_dataset.map(im.load_image_train,
                                   num_parallel_calls=tf.data.AUTOTUNE)
-train_dataset = train_dataset.shuffle(BUFFER_SIZE)
-train_dataset = train_dataset.batch(BATCH_SIZE)
+train_dataset = train_dataset.shuffle(pm.BUFFER_SIZE)
+train_dataset = train_dataset.batch(pm.BATCH_SIZE)
 
-test_dataset = tf.data.Dataset.list_files(DATASET_PATH+'test/*.jpg')
+test_dataset = tf.data.Dataset.list_files(pm.DATASET_PATH+'test/*.jpg')
 test_dataset = test_dataset.map(im.load_image_test)
-test_dataset = test_dataset.batch(BATCH_SIZE)
-
+test_dataset = test_dataset.batch(pm.BATCH_SIZE)
 
 # Generator
 generator = gan.Generator()
@@ -99,7 +91,6 @@ generator = gan.Generator()
 # Test generator
 # gen_output = generator(inp[tf.newaxis, ...], training=False)
 # plt.imshow(gen_output[0, ...])
-
 
 # Discriminator
 discriminator = gan.Discriminator()
@@ -110,20 +101,19 @@ discriminator = gan.Discriminator()
 # plt.imshow(disc_out[0, ..., -1], vmin=-20, vmax=20, cmap='RdBu_r')
 # plt.colorbar()
 
-
 # Optimizer
 generator_optimizer = tf.keras.optimizers.Adam(2e-4, beta_1=0.5)
 discriminator_optimizer = tf.keras.optimizers.Adam(2e-4, beta_1=0.5)
 
-
 # Checkpoints
-checkpoint_prefix = os.path.join(CHECKPOINT_DIR, "ckpt")
+checkpoint_prefix = os.path.join(pm.CHECKPOINT_DIR, 'ckpt')
 checkpoint = tf.train.Checkpoint(generator_optimizer=generator_optimizer,
                                  discriminator_optimizer=discriminator_optimizer,
                                  generator=generator,
                                  discriminator=discriminator)
 
 # restoring the latest checkpoint in checkpoint_dir
-checkpoint.restore(tf.train.latest_checkpoint(CHECKPOINT_DIR))
+if pm.CONTINUE_FROM_LAST_CHECK:
+    checkpoint.restore(tf.train.latest_checkpoint(pm.CHECKPOINT_DIR))
 
-fit(train_dataset, EPOCHS, test_dataset)
+fit(train_dataset, pm.EPOCHS, test_dataset)

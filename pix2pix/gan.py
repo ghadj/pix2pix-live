@@ -1,10 +1,7 @@
 from matplotlib import pyplot as plt
 import tensorflow as tf
 
-# Generator & Discriminator
-
-OUTPUT_CHANNELS = 3
-LAMBDA = 100
+import params as pm
 
 
 def downsample(filters, size, apply_batchnorm=True):
@@ -68,7 +65,7 @@ def Generator():
     ]
 
     initializer = tf.random_normal_initializer(0., 0.02)
-    last = tf.keras.layers.Conv2DTranspose(OUTPUT_CHANNELS, 4,
+    last = tf.keras.layers.Conv2DTranspose(pm.OUTPUT_CHANNELS, 4,
                                            strides=2,
                                            padding='same',
                                            kernel_initializer=initializer,
@@ -81,7 +78,6 @@ def Generator():
     for down in down_stack:
         x = down(x)
         skips.append(x)
-
     skips = reversed(skips[:-1])
 
     # Upsampling and establishing the skip connections
@@ -98,11 +94,9 @@ def generator_loss(disc_generated_output, gen_output, target, loss_object):
     gan_loss = loss_object(tf.ones_like(
         disc_generated_output), disc_generated_output)
 
-    # mean absolute error
+    # Mean absolute error
     l1_loss = tf.reduce_mean(tf.abs(target - gen_output))
-
-    total_gen_loss = gan_loss + (LAMBDA * l1_loss)
-
+    total_gen_loss = gan_loss + (pm.LAMBDA * l1_loss)
     return total_gen_loss, gan_loss, l1_loss
 
 
@@ -146,10 +140,8 @@ def discriminator_loss(disc_real_output, disc_generated_output, loss_object):
     return total_disc_loss
 
 
-# @TODO return image
-
-
 def generate_images(model, test_input, tar, filename):
+    # @TODO return image
     prediction = model(test_input, training=True)
 
     fig = plt.figure(figsize=(50, 50))
@@ -163,5 +155,6 @@ def generate_images(model, test_input, tar, filename):
         # getting the pixel values between [0, 1] to plot it.
         plt.imshow(display_list[i] * 0.5 + 0.5)
         plt.axis('off')
+
     plt.savefig(filename, bbox_inches='tight')
     plt.close(fig)

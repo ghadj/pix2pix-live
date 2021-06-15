@@ -1,10 +1,7 @@
 import tensorflow as tf
 
-IMG_WIDTH = 256
-IMG_HEIGHT = 256
+import params as pm
 
-# @TODO
-# use two images instead of splitting a single one
 
 def load(image_file):
     image = tf.io.read_file(image_file)
@@ -34,7 +31,7 @@ def resize(input_image, real_image, height, width):
 def random_crop(input_image, real_image):
     stacked_image = tf.stack([input_image, real_image], axis=0)
     cropped_image = tf.image.random_crop(
-        stacked_image, size=[2, IMG_HEIGHT, IMG_WIDTH, 3])
+        stacked_image, size=[2, pm.IMG_HEIGHT, pm.IMG_WIDTH, 3])
 
     return cropped_image[0], cropped_image[1]
 
@@ -74,7 +71,7 @@ def load_image_train(image_file):
 def load_image_test(image_file):
     input_image, real_image = load(image_file)
     input_image, real_image = resize(input_image, real_image,
-                                     IMG_HEIGHT, IMG_WIDTH)
+                                     pm.IMG_HEIGHT, pm.IMG_WIDTH)
     input_image, real_image = normalize(input_image, real_image)
 
     return input_image, real_image
