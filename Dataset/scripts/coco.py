@@ -20,7 +20,7 @@ urllib.request.urlretrieve(ANNOTATIONS_LINK, filename=os.path.join(ANNOTATIONS_P
 
 # Unzip
 print('Unzip annotations file')
-with zipfile.ZipFile(os.path.join(ANNOTATIONS_PATH, 'annotations', 'trainval2017.zip'), 'r') as zip_ref:
+with zipfile.ZipFile(os.path.join(ANNOTATIONS_PATH, 'annotations_trainval2017.zip'), 'r') as zip_ref:
     zip_ref.extractall(ANNOTATIONS_PATH)
 
 # Instantiate COCO specifying the annotations json path
@@ -35,5 +35,5 @@ images = coco.loadImgs(imgIds)
 # Save the images into a local folder
 for im in tqdm(images, desc='Downloading images'):
     img_data = requests.get(im['coco_url']).content
-    with open(DATASET_PATH + im['file_name'], 'wb') as handler:
+    with open(os.path.join(DATASET_PATH, im['file_name']), 'wb') as handler:
         handler.write(img_data)
