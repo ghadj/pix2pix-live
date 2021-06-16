@@ -19,7 +19,7 @@ files = [os.path.join(dp, f) for dp, dn, fn in os.walk(
 
 for f in tqdm(files):
     path, filename = os.path.split(f)
-    f_hed = DEST_PATH + filename[:-4] + '_hed' + filename[-4:]
+    f_hed = os.path.join(DEST_PATH, filename[:-4] + '_hed' + filename[-4:])
     input = cv.imread(f)
     output = detector.run(input)
     cv.imwrite(f_hed, output)
