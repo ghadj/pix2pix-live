@@ -74,13 +74,15 @@ summary_writer = tf.summary.create_file_writer(
     pm.LOG_DIR + datetime.datetime.now().strftime('%Y%m%d-%H%M%S'))
 
 # Input pipeline
-train_dataset = tf.data.Dataset.list_files(pm.DATASET_PATH+'train/*.jpg')
+train_dataset = tf.data.Dataset.list_files(
+    os.path.join(pm.DATASET_PATH, 'train', '*.jpg'))
 train_dataset = train_dataset.map(im.load_image_train,
                                   num_parallel_calls=tf.data.AUTOTUNE)
 train_dataset = train_dataset.shuffle(pm.BUFFER_SIZE)
 train_dataset = train_dataset.batch(pm.BATCH_SIZE)
 
-test_dataset = tf.data.Dataset.list_files(pm.DATASET_PATH+'test/*.jpg')
+test_dataset = tf.data.Dataset.list_files(
+    os.path.join(pm.DATASET_PATH, 'test', '*.jpg'))
 test_dataset = test_dataset.map(im.load_image_test)
 test_dataset = test_dataset.batch(pm.BATCH_SIZE)
 
