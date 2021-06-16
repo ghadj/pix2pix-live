@@ -1,5 +1,6 @@
 import os
 import cv2 as cv
+from tqdm import tqdm
 
 import edge_detector as ed
 
@@ -16,10 +17,9 @@ detector = ed.EdgeDetector()
 files = [os.path.join(dp, f) for dp, dn, fn in os.walk(
     os.path.expanduser(SRC_PATH)) for f in fn if f.endswith(tuple(img_extentions))]
 
-for f in files:
+for f in tqdm(files):
     path, filename = os.path.split(f)
     f_hed = DEST_PATH + filename[:-4] + '_hed' + filename[-4:]
-    print(f + ' => ' + f_hed)
     input = cv.imread(f)
     output = detector.run(input)
     cv.imwrite(f_hed, output)
