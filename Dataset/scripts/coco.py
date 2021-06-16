@@ -2,24 +2,28 @@ import requests
 from pycocotools.coco import COCO
 import urllib.request
 import zipfile
+import os
 
 
-ANNOTATIONS_PATH = '../'
+# Absolute path to the module directory
+package_dir = os.path.dirname(os.path.abspath(__file__))
+
+ANNOTATIONS_PATH = os.path.join(package_dir, '..')
 ANNOTATIONS_LINK = 'http://images.cocodataset.org/annotations/annotations_trainval2017.zip'
-DATASET_PATH = '../train/'
+DATASET_PATH = os.path.join(package_dir, '..', 'train')
 
 # Download annotations file
 print('Downloading annotations')
-urllib.request.urlretrieve(ANNOTATIONS_LINK, filename=ANNOTATIONS_PATH +
-                   'annotations_trainval2017.zip')
+urllib.request.urlretrieve(ANNOTATIONS_LINK, filename=os.path.join(ANNOTATIONS_PATH, 
+                           'annotations_trainval2017.zip'))
 
 # Unzip
 print('Unzip annotations file')
-with zipfile.ZipFile(ANNOTATIONS_PATH + 'annotations/trainval2017.zip', 'r') as zip_ref:
+with zipfile.ZipFile(os.path.join(ANNOTATIONS_PATH, 'annotations', 'trainval2017.zip'), 'r') as zip_ref:
     zip_ref.extractall(ANNOTATIONS_PATH)
 
 # Instantiate COCO specifying the annotations json path
-coco = COCO(ANNOTATIONS_PATH + 'annotations/instances_train2017.json')
+coco = COCO(os.path.join(ANNOTATIONS_PATH, 'annotations', 'instances_train2017.json'))
 # Specify a list of category names of interest
 catIds = coco.getCatIds(catNms=['person'])
 # Get the corresponding image ids and images using loadImgs

@@ -3,8 +3,11 @@ import cv2 as cv
 
 import edge_detector as ed
 
-SRC_PATH = '../Dataset/train/'
-DEST_PATH =  '../Dataset/test/'
+# Absolute path to the module directory
+package_dir = os.path.dirname(os.path.abspath(__file__))
+
+SRC_PATH = os.path.join(package_dir, '..', 'Dataset', 'train')
+DEST_PATH =  os.path.join(package_dir, '..', 'Dataset', 'test')
 
 img_extentions = ['.jpg', '.png']
 

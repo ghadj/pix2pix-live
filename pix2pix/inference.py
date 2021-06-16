@@ -4,11 +4,14 @@ import tensorflow as tf
 import gan
 import image as im
 
-CHECKPOINT_DIR = './training_checkpoints/'
-DATASET_PATH = '../dataset/'
+# Absolute path to the module directory
+package_dir = os.path.dirname(os.path.abspath(__file__))
+
+CHECKPOINT_DIR = os.path.join(package_dir, '.' 'training_checkpoints')
+DATASET_PATH = os.path.join(package_dir, '..', 'dataset')
 BATCH_SIZE = 1
 
-test_dataset = tf.data.Dataset.list_files(DATASET_PATH+'test/*.jpg')
+test_dataset = tf.data.Dataset.list_files(os.path.join(DATASET_PATH, 'test', '*.jpg'))
 test_dataset = test_dataset.map(im.load_image_test)
 test_dataset = test_dataset.batch(BATCH_SIZE)
 
@@ -33,5 +36,5 @@ checkpoint = tf.train.Checkpoint(generator_optimizer=generator_optimizer,
 checkpoint.restore(tf.train.latest_checkpoint(CHECKPOINT_DIR))
 
 # Run the trained model on a few examples from the test dataset
-for inp, tar in test_dataset.take(5):
-    gan.generate_images(generator, inp, tar, './test.png')
+for inp, tar in test_dataset.take(1):
+    gan.generate_images(generator, inp, tar, 'test.png')
