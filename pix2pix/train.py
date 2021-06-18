@@ -2,6 +2,7 @@ import os
 import time
 import datetime
 import tensorflow as tf
+from tqdm import tqdm
 
 import gan
 import image as im
@@ -51,15 +52,10 @@ def fit(train_ds, epochs, test_ds):
         for example_input, example_target in test_ds.take(1):
             gan.generate_images(generator, example_input, example_target,
                                 os.path.join(pm.CHECKPOINT_IMG_DIR, '{0:03d}'.format(epoch) + '.png'))
-        print('Epoch: ', epoch)
 
         # Train
-        for n, (input_image, target) in train_ds.enumerate():
-            print('.', end='')
-            if (n+1) % 100 == 0:
-                print()
+        for n, (input_image, target) in tqdm(train_ds.enumerate(), desc='Epoch {}'.format(epoch)):
             train_step(input_image, target, epoch, loss_object)
-        print()
 
         # saving (checkpoint) the model every 20 epochs
         if (epoch + 1) % 20 == 0:
