@@ -50,7 +50,7 @@ def fit(train_ds, epochs, test_ds):
 
         for example_input, example_target in test_ds.take(1):
             gan.generate_images(generator, example_input, example_target,
-                                pm.CHECKPOINT_IMG_DIR + '{0:03d}'.format(epoch) + '.png')
+                                os.path.join(pm.CHECKPOINT_IMG_DIR, '{0:03d}'.format(epoch) + '.png'))
         print('Epoch: ', epoch)
 
         # Train
