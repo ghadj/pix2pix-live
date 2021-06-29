@@ -1,5 +1,4 @@
 import os
-import time
 import datetime
 import tensorflow as tf
 from tqdm import tqdm
@@ -45,9 +44,6 @@ def fit(train_ds, epochs, test_ds):
     loss_object = tf.keras.losses.BinaryCrossentropy(from_logits=True)
 
     for epoch in range(epochs):
-        start = time.time()
-
-        # display.clear_output(wait=True)
 
         for example_input, example_target in test_ds.take(1):
             gan.generate_images(generator, example_input, example_target,
@@ -61,8 +57,6 @@ def fit(train_ds, epochs, test_ds):
         if (epoch + 1) % 20 == 0:
             checkpoint.save(file_prefix=checkpoint_prefix)
 
-        print('Time taken for epoch {} is {} sec\n'.format(epoch + 1,
-                                                           time.time()-start))
     checkpoint.save(file_prefix=checkpoint_prefix)
 
 
@@ -86,18 +80,9 @@ test_dataset = test_dataset.batch(pm.BATCH_SIZE)
 generator = gan.Generator()
 # tf.keras.utils.plot_model(generator, show_shapes=True, dpi=64)
 
-# Test generator
-# gen_output = generator(inp[tf.newaxis, ...], training=False)
-# plt.imshow(gen_output[0, ...])
-
 # Discriminator
 discriminator = gan.Discriminator()
 # tf.keras.utils.plot_model(discriminator, show_shapes=True, dpi=64)
-
-# Test discriminator
-# disc_out = discriminator([inp[tf.newaxis, ...], gen_output], training=False)
-# plt.imshow(disc_out[0, ..., -1], vmin=-20, vmax=20, cmap='RdBu_r')
-# plt.colorbar()
 
 # Optimizer
 generator_optimizer = tf.keras.optimizers.Adam(2e-4, beta_1=0.5)
