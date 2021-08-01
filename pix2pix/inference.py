@@ -7,8 +7,8 @@ import image as im
 # Absolute path to the module directory
 package_dir = os.path.dirname(os.path.abspath(__file__))
 
-CHECKPOINT_DIR = os.path.join(package_dir, '.' 'training_checkpoints')
-DATASET_PATH = os.path.join(package_dir, '..', 'dataset')
+CHECKPOINT_DIR = os.path.join(package_dir, '.', 'training_checkpoints')
+DATASET_PATH = os.path.join(package_dir, '..', 'Dataset')
 BATCH_SIZE = 1
 
 test_dataset = tf.data.Dataset.list_files(os.path.join(DATASET_PATH, 'test', '*.jpg'))
