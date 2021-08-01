@@ -1,7 +1,8 @@
 import os
+import time
 import datetime
 import tensorflow as tf
-from tqdm import tqdm
+import tqdm
 
 import gan
 import image as im
@@ -43,46 +44,46 @@ def fit(train_ds, epochs, test_ds):
 
     loss_object = tf.keras.losses.BinaryCrossentropy(from_logits=True)
 
-    for epoch in range(epochs):
+    for epoch in (range(epochs)):
+        start = time.time()
 
+        # Test
         for example_input, example_target in test_ds.take(1):
             gan.generate_images(generator, example_input, example_target,
                                 os.path.join(pm.CHECKPOINT_IMG_DIR, '{0:03d}'.format(epoch) + '.png'))
 
         # Train
-        for n, (input_image, target) in tqdm(train_ds.enumerate(), desc='Epoch {}'.format(epoch)):
+        for n, (input_image, target) in tqdm.tqdm(train_ds.enumerate(), desc='Epoch {}'.format(epoch)):
             train_step(input_image, target, epoch, loss_object)
 
-        # saving (checkpoint) the model every 20 epochs
-        if (epoch + 1) % 20 == 0:
-            checkpoint.save(file_prefix=checkpoint_prefix)
+        print('Time taken for epoch {} is {} sec\n'.format(epoch + 1, time.time()-start))
 
-    checkpoint.save(file_prefix=checkpoint_prefix)
+        # Save Checkpoint
+        if (epoch + 1) % pm.CHECKPOINT_EVERY_EPOCH == 0:
+            checkpoint.save(file_prefix=checkpoint_prefix)
 
 
 summary_writer = tf.summary.create_file_writer(
     pm.LOG_DIR + datetime.datetime.now().strftime('%Y%m%d-%H%M%S'))
 
 # Input pipeline
-train_dataset = tf.data.Dataset.list_files(
-    os.path.join(pm.DATASET_PATH, 'train', '*.jpg'))
-train_dataset = train_dataset.map(im.load_image_train,
-                                  num_parallel_calls=tf.data.AUTOTUNE)
+train_dataset = tf.data.Dataset.list_files(pm.TRAIN_DATASET_PATH)
 train_dataset = train_dataset.shuffle(pm.BUFFER_SIZE)
-train_dataset = train_dataset.batch(pm.BATCH_SIZE)
+train_dataset = train_dataset.map(im.load_image_train,
+                                  num_parallel_calls=tf.data.experimental.AUTOTUNE)
+train_dataset = train_dataset.batch(pm.BATCH_SIZE).prefetch(1)
 
-test_dataset = tf.data.Dataset.list_files(
-    os.path.join(pm.DATASET_PATH, 'test', '*.jpg'))
+test_dataset = tf.data.Dataset.list_files(pm.TEST_DATASET_PATH)
 test_dataset = test_dataset.map(im.load_image_test)
 test_dataset = test_dataset.batch(pm.BATCH_SIZE)
 
 # Generator
 generator = gan.Generator()
-# tf.keras.utils.plot_model(generator, show_shapes=True, dpi=64)
+tf.keras.utils.plot_model(generator, to_file='generator.png', show_shapes=True, dpi=64)
 
 # Discriminator
 discriminator = gan.Discriminator()
-# tf.keras.utils.plot_model(discriminator, show_shapes=True, dpi=64)
+tf.keras.utils.plot_model(discriminator, to_file='discriminator.png', show_shapes=True, dpi=64)
 
 # Optimizer
 generator_optimizer = tf.keras.optimizers.Adam(2e-4, beta_1=0.5)
@@ -95,7 +96,7 @@ checkpoint = tf.train.Checkpoint(generator_optimizer=generator_optimizer,
                                  generator=generator,
                                  discriminator=discriminator)
 
-# restoring the latest checkpoint in checkpoint_dir
+# Restoring the latest checkpoint in checkpoint_dir
 if pm.CONTINUE_FROM_LAST_CHECK:
     checkpoint.restore(tf.train.latest_checkpoint(pm.CHECKPOINT_DIR))
 
